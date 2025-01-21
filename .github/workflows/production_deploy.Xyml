@@ -1,0 +1,66 @@
+name: Deploy to Production VPS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy_production:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
+
+      - name: Add PRODUCTION VPS to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -4 -H 13.43.235.77 >> ~/.ssh/known_hosts
+
+      - name: Deploy to Production VPS
+        run: |
+          ssh ubuntu@13.43.235.77 '
+            set -e
+            cd ~/app/project_templates &&
+
+            echo "*** Resetting any unstaged files." &&
+            git reset --hard &&
+            git clean -fd &&
+
+            echo "Fetching latest code from GitHub" &&
+            git pull origin main &&
+
+            echo "*** Deleting build artifacts" &&
+            echo "VG: rm -rf server/dist server/prisma/build client/.next &&"
+            rm -rf server/dist client/.next &&
+
+            echo "*** Installing dependencies for server and client" &&
+            cd server &&
+            npm install --include=dev &&            
+            cd ../client &&
+            npm install --include=dev &&
+
+            echo "*** Building client" &&
+            npm run build &&
+            
+            echo "*** Running Production Migrations (no reset, no seed)" &&
+            cd ../server
+            echo "VG: npm run production:migrate &&"
+
+            echo "*** Building server application" &&
+            npm run build &&
+
+            echo "*** Removing devDependencies for server and client" &&
+            npm prune --production &&
+            cd ../client &&
+            npm prune --production &&
+
+            echo "*** Restarting server and client" &&   
+            cd ~/app &&         
+            pm2 startOrRestart ecosystem.config.js --only project_templates_server --env production
+            pm2 startOrRestart ecosystem.config.js --only project_templates_client --env production
+          '

@@ -1,0 +1,78 @@
+name: Deploy to Staging VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_staging:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+      - name: Add VPS to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 31.220.111.185 >> ~/.ssh/known_hosts
+
+      - name: Deploy to Staging VPS
+        run: |
+          ssh vg@31.220.111.185 '
+            set -euo pipefail  && # Fail fast if errors occur
+            
+            echo "Running Github Action..............."
+            cd ~/projects/project_templates &&
+
+            echo "*** Resetting any unstaged files ***"
+            git reset --hard &&
+            git clean -fd &&
+
+            echo "*** Fetching latest code from GitHub ***"
+            git pull origin main &&
+
+            echo "*** Deleting build artifacts ***"
+            rm -rf server/dist client/.next &&
+
+            echo "*** Installing server dependencies ***"
+            cd server &&
+            npm install --include=dev &&
+
+            echo "*** Running Prisma migrations for STAGING ***"
+            echo "npx dotenv -e .env.staging -- npx prisma db push --force-reset --accept-data-loss"
+            echo "npx dotenv -e .env.staging -- npx prisma generate"
+
+            echo "*** Seeding database for STAGING ***"
+            echo "npx dotenv -e .env.staging -- npm run seed"
+
+            echo "*** Building server application ***"
+            npm run build &&
+
+            echo "*** Removing server devDependencies ***"
+            npm prune --production &&
+
+            echo "*** Installing client dependencies ***"
+            cd ../client &&
+            npm install --include=dev &&
+
+            echo "*** Building client application ***"
+            npm run build &&
+
+            echo "*** Removing client devDependencies ***"
+            npm prune --production &&
+
+            echo "*** Restarting server and client with PM2 (ecosystem) ***"
+            cd ~/projects &&
+            pm2 startOrRestart ecosystem.config.js --only project_templates_server --env staging &&
+            pm2 startOrRestart ecosystem.config.js --only project_templates_client --env production &&
+
+            echo "*** Deployment to Staging Completed Successfully ***"
+            echo "************** END ***********"
+          '

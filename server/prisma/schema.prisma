@@ -1,0 +1,318 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AddressType {
+  HOME
+  WORK
+  BILLING
+  SHIPPING
+}
+enum AuditAction {
+  DELETE
+  CREATE
+  UPDATE
+  SUBSCRIBE
+  UNSUBSCRIBE
+  ACCESS
+  LOGIN
+  LOGOUT
+  REGISTER
+}
+enum EmployeeStatus {
+  AVAILABLE
+  UNAVAILABLE
+  ON_LEAVE
+}
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+enum NotificationCategory {
+  USER_ACTION
+  SYSTEM_ALERT
+  PROMOTION
+}
+enum NotificationStatus {
+  UNREAD
+  READ
+  DISMISSED
+}
+enum NotificationType {
+  GENERAL
+  CREATED_CAMPAIGN
+  CAMPAIGN_STATUS_CHANGE
+  SCHEDULED_MAINTENANCE
+  REGISTRATION
+  DELETE_ACCOUNT
+}
+enum PaymentMethod {
+  CARD
+  INVOICE
+}
+enum PhoneType {
+  MOBILE
+  HOME
+  WORK
+  OTHER
+}
+enum SeverityLevel {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+enum ThemeType {
+  LIGHT
+  DARK
+}
+enum UserRole {
+  ADMIN
+  MODERATOR 
+  EMPLOYEE
+}
+
+// -----------------------------------------
+
+model User {
+  id              String         @id @default(uuid())
+  email           String         @unique @db.VarChar(255)
+  password        String         @db.VarChar(255)
+  firstName       String         @db.VarChar(100)
+  lastName        String         @db.VarChar(100)
+  title           String?        @db.VarChar(10)
+  notes           String?        @db.VarChar(300)
+  role            UserRole
+  addresses       Address[]  
+  employees       Employee[]
+  admin           Admin?         @relation("UserToAdmin") 
+  moderator       Moderator?     @relation("UserToModerator") 
+  refreshTokens   RefreshToken[] @relation("UserRefreshTokens")
+  isEmailVerified Boolean        @default(false)  
+  avatarName      String?        
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  phoneNumbers    PhoneNumber[]
+
+  twoFactorEnabled     Boolean        @default(false)
+  twoFactorSecret String?     
+  
+  backupCodesEnabled    Boolean   @default(false)
+  backupCodes       BackupCode[] 
+
+  isDeleted Boolean   @default(false) // Soft delete flag for user
+  deletedAt DateTime?
+
+  errorLogs ErrorLog[]
+
+  notifications Notification[]
+  
+  userPreferences UserPreference[]
+
+  passwordResets PasswordReset[]
+
+  passwordResetRequests PasswordResetRequest[]
+}
+
+
+model Admin {
+  id              String      @id @default(uuid())
+  userId          String      @unique
+  user            User        @relation("UserToAdmin", fields: [userId], references: [id])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+model Moderator {
+  id              String      @id @default(uuid())
+  userId          String      @unique
+  user            User        @relation("UserToModerator", fields: [userId], references: [id])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+model Employee {
+  id             String                 @id @default(uuid())
+  userId         String                 @unique
+  user           User                   @relation(fields: [userId], references: [id])
+  dob            DateTime
+  gender         Gender
+  status         EmployeeStatus         @default(AVAILABLE)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  isDeleted Boolean   @default(false) // Soft delete flag for user
+  deletedAt DateTime?
+}
+
+
+// ======================================================
+model Address {
+  id        String  @id @default(uuid())  
+  address1  String  @db.VarChar(255)
+  address2  String? @db.VarChar(255)
+  city      String  @db.VarChar(100)
+  region    String  @db.VarChar(100) // California, Middlesex
+  zipCode   String  @db.VarChar(20)
+  countryId String
+  country   Country @relation(fields: [countryId], references: [id])
+
+  latitude  Decimal?
+  longitude Decimal?
+  type      AddressType @default(HOME)
+  isDeleted Boolean     @default(false)
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id])  
+}
+model AuditLog {
+  id          String      @id @default(uuid())
+  action      AuditAction //String   @db.VarChar(100) // Could store actions like "DELETE", "CREATE", "UPDATE"
+  userId      String?     @db.VarChar(100) // User who performed the action
+  entity      String?     @db.VarChar(100) // Table or entity type affected (e.g., Employee, Contract)  
+  details     String?     @db.Text // Optional: could store a summary of what was changed
+  ipAddress   String?     @db.VarChar(45) // IPv6 addresses can be up to 45 characters
+  city        String?     @db.VarChar(80)
+  region      String?     @db.VarChar(80) // England
+  country     String?     @db.VarChar(80)
+  countryCode String?     @db.VarChar(3) //
+  createdAt   DateTime    @default(now()) // When the action was logged
+}
+model BackupCode {
+  id        String   @id @default(uuid())
+  codeHash  String    @unique  
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String    
+  used      Boolean @default(false)
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  @@index([userId, used]) // Optimize queries filtering by userId and used status
+}
+model Country {
+  id            String                @id @default(uuid())
+  name          String                @unique @db.VarChar(100)
+  code          String                @db.VarChar(10) // ISO country code, optional
+  dialingCode   String                @db.VarChar(5)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  isDeleted     Boolean               @default(false)
+  addresses     Address[]  
+}
+model EmailTemplate {
+  id            String            @id @default(uuid())
+  name          String            @unique @db.VarChar(100) // e.g. "verification_email"  
+  subject       String            @db.VarChar(255)
+  htmlContent   String            @db.Text
+  textContent   String?           @db.Text
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+model ErrorLog {
+  id         String        @id @default(uuid())
+  errorCode  String        @db.VarChar(100)
+  message    String        @db.VarChar(500)
+  stackTrace String?       @db.Text
+  userId     String?
+  user       User?         @relation(fields: [userId], references: [id])
+  createdAt  DateTime      @default(now())
+  severity   SeverityLevel
+}
+model PhoneNumber {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+  // fullNumber === Dialing Code + Number
+  fullNumber       String    @unique @db.VarChar(20)
+  // dialingCode String    @db.VarChar(5)
+  // number      String    @db.VarChar(20)
+  type             PhoneType @default(MOBILE)
+  isPrimary        Boolean   @default(true)
+  isVerified       Boolean   @default(false)
+  verifiedAt       DateTime?
+  verificationCode Int? // ToDo: use Twilio to verify
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+model Notification {
+  id        String               @id @default(uuid())
+  userId    String
+  user      User                 @relation(fields: [userId], references: [id])
+  title     String               @db.VarChar(255)
+  message   String               @db.Text
+  type      NotificationType
+  status    NotificationStatus   @default(UNREAD)
+  category  NotificationCategory
+  createdAt DateTime             @default(now())
+  readAt    DateTime?
+  read      Boolean              @default(false)
+  link      String?              @db.VarChar(255) // Optional link to relevant page  
+
+  scheduledAt        DateTime? // When the notification is scheduled to be sent
+  isRecurring        Boolean   @default(false)
+  recurrenceInterval String? // e.g., 'daily', 'weekly', 'monthly'
+  expiryDate    DateTime?   // For system generated messages
+}
+
+model QrCode {
+  id          String      @id @default(uuid()) // Use UUID for primary key
+  name        String      @db.VarChar(255)
+  url         String      @db.Text
+  qrCodeImage String      @db.Text
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  scans       QrCodeScan[]
+}
+model QrCodeScan {
+  id         String   @id @default(uuid()) // Use UUID for primary key
+  qrCodeId   String   // Must match the type of QrCode.id
+  ipAddress  String?  @db.VarChar(255)
+  userAgent  String?  @db.Text
+  scanTime   DateTime @default(now())
+
+  qrCode     QrCode   @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique @db.VarChar(500)
+  userId    String   @db.VarChar(200) // allow multiple refresh tokens (e.g., for different devices)
+  role      String   @db.VarChar(10)
+  user      User     @relation("UserRefreshTokens", fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+model PasswordReset {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @db.VarChar(255)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+model PasswordResetRequest {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  token     String?
+  ipAddress String?
+}
+model UserPreference {
+  id                   String    @id @default(uuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id])
+  receiveNewsletters   Boolean   @default(true)
+  receiveReminders     Boolean   @default(true)
+  theme                ThemeType @default(LIGHT)
+  notificationSettings Json?
+}

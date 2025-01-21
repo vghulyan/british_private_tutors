@@ -1,0 +1,13 @@
+node_modules
+# Keep environment variables out of version control
+.env
+.env.development
+.env.production
+.env.staging
+node_modules/
+src/logs/reqLog.log
+src/logs/errLog.log
+src/logs/*
+prisma/build/seed.js
+
+uploadedImages/*

@@ -1,0 +1,14 @@
+Welcome to {{Your Company}}, {{name}}!
+
+Thank you for signing up. Please confirm your email address to complete your registration by clicking the link below:
+
+Verify Your Email: {{verificationLink}}
+
+If you didn’t create this account, you can safely ignore this email.
+
+If the link above doesn't work, copy and paste the following link into your browser:
+{{verificationLink}}
+
+© {{Your Company}} - All rights reserved.
+
+For any issues, please contact our support at support@project.com.

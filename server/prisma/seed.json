@@ -1,0 +1,181 @@
+{
+  "users": [
+    {
+      "email": "admin@example.com",
+      "password": "Password123!",
+      "firstName": "Admin",
+      "lastName": "User",
+      "title": "Mr",
+      "role": "ADMIN",
+      "isEmailVerified": true,
+      "phoneNumbers": [
+        {
+          "fullNumber": "+374123456789",
+          "type": "MOBILE",
+          "isPrimary": true,
+          "isVerified": true
+        }
+      ]
+    },
+    {
+      "email": "moderator1@example.com",
+      "password": "Password123!",
+      "firstName": "Moderator1",
+      "lastName": "User",
+      "title": "Mr",
+      "role": "MODERATOR",
+      "isEmailVerified": true,
+      "phoneNumbers": [
+        {
+          "fullNumber": "+374223456789",
+          "type": "MOBILE",
+          "isPrimary": true,
+          "isVerified": true
+        }
+      ]
+    },
+    {
+      "email": "moderator2@example.com",
+      "password": "Password123!",
+      "firstName": "Moderator2",
+      "lastName": "User",
+      "title": "Mr",
+      "role": "MODERATOR",
+      "isEmailVerified": true,
+      "phoneNumbers": [
+        {
+          "fullNumber": "+374323456789",
+          "type": "MOBILE",
+          "isPrimary": true,
+          "isVerified": true
+        }
+      ]
+    },
+    {
+      "email": "employee1@example.com",
+      "password": "Password123!",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "title": "Ms",
+      "notes": "Experienced in childcare and first aid.",
+      "role": "EMPLOYEE",
+      "isEmailVerified": true,
+      "phoneNumbers": [
+        {
+          "fullNumber": "+17123456786",
+          "type": "MOBILE",
+          "isPrimary": true,
+          "isVerified": true
+        }
+      ]
+    },
+    {
+      "email": "employee2@example.com",
+      "password": "Password123!",
+      "firstName": "Bob",
+      "lastName": "Johnson",
+      "title": "Mr",
+      "notes": "Expert gardener with landscaping experience.",
+      "role": "EMPLOYEE",
+      "isEmailVerified": true,
+      "phoneNumbers": [
+        {
+          "fullNumber": "+337123456785",
+          "type": "MOBILE",
+          "isPrimary": true,
+          "isVerified": true
+        }
+      ]
+    },
+    {
+      "email": "employee3@example.com",
+      "password": "Password123!",
+      "firstName": "Sarah",
+      "lastName": "Smith",
+      "title": "Ms",
+      "notes": "Experienced in elderly care.",
+      "role": "EMPLOYEE",
+      "isEmailVerified": true,
+      "phoneNumbers": [
+        {
+          "fullNumber": "+17123356786",
+          "type": "MOBILE",
+          "isPrimary": true,
+          "isVerified": true
+        }
+      ]
+    }
+  ],
+  "countries": [
+    { "name": "United Kingdom", "code": "GB", "dialingCode": "+44" },
+    { "name": "United States", "code": "US", "dialingCode": "+1" },
+    { "name": "France", "code": "FR", "dialingCode": "+33" },
+    { "name": "Spain", "code": "ES", "dialingCode": "+34" },
+    { "name": "Brazil", "code": "BR", "dialingCode": "+55" }
+  ],
+  "addresses": [
+    {
+      "address1": "123 Main St",
+      "city": "London",
+      "region": "Greater London",
+      "zipCode": "SW1A 1AA",
+      "country": "United Kingdom",
+      "userEmail": "employer1@example.com",
+      "type": "HOME"
+    },
+    {
+      "address1": "789 Oak St",
+      "city": "Birmingham",
+      "region": "West Midlands",
+      "zipCode": "B1 1AA",
+      "country": "United Kingdom",
+      "userEmail": "employer2@example.com",
+      "type": "HOME"
+    },
+    {
+      "address1": "456 Elm St",
+      "city": "Manchester",
+      "region": "Greater Manchester",
+      "zipCode": "M1 1AE",
+      "country": "United Kingdom",
+      "userEmail": "employee1@example.com",
+      "type": "HOME"
+    },
+    {
+      "address1": "321 Pine St",
+      "city": "Leeds",
+      "region": "West Yorkshire",
+      "zipCode": "LS1 1AA",
+      "country": "United Kingdom",
+      "userEmail": "employee2@example.com",
+      "type": "HOME"
+    }
+  ],
+  "admin": {
+    "userEmail": "admin@example.com"
+  },
+  "moderators": [
+    { "userEmail": "moderator1@example.com" },
+    { "userEmail": "moderator2@example.com" }
+  ],
+  "employees": [
+    {
+      "userEmail": "employee1@example.com",
+      "dob": "1990-05-15",
+      "gender": "FEMALE",
+      "status": "AVAILABLE"
+    },
+    {
+      "userEmail": "employee2@example.com",
+      "dob": "1985-08-22",
+      "gender": "MALE",
+      "status": "ON_LEAVE"
+    },
+    {
+      "userEmail": "employee3@example.com",
+      "dob": "1980-05-15",
+      "gender": "FEMALE",
+      "status": "AVAILABLE"
+    }
+  ]
+}
