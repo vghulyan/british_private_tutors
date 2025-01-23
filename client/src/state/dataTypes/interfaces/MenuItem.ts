@@ -18,5 +18,4 @@ export interface MenuGroup {
 export interface MegaMenuProps {
   menuData: MenuGroup[];
   userRole: UserRole;
-  align?: "left" | "right" | "center";
 }

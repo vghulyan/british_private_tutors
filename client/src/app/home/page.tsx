@@ -2,6 +2,7 @@
 
 import React from "react";
 import Footer from "../UI/components/Footer/Footer";
+import BookingDatePicker from "../UI/components/Calendar/BookingDatePicker/BookingDatePicker";
 
 const Home = () => {
   return (
@@ -18,6 +19,8 @@ const Home = () => {
           school truly special.
         </h3>
       </div>
+
+      <BookingDatePicker />
 
       <section className="mt-16">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">

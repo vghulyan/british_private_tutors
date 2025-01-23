@@ -1,9 +1,12 @@
 import { MegaMenuProps, MenuItem } from "@/state/dataTypes/interfaces";
+import { useAppDispatch } from "@/state/store/redux";
+import { selectMenuItem, SerializableMenuItem } from "@/state/store/global";
 import { Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 
 const MegaMenu: React.FC<MegaMenuProps> = ({ menuData, userRole }) => {
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -19,7 +22,8 @@ const MegaMenu: React.FC<MegaMenuProps> = ({ menuData, userRole }) => {
   }, []);
 
   const handleItemClick = (item: MenuItem) => {
-    const { icon, ...rest } = item;
+    const { icon, ...serializableItem } = item;
+    dispatch(selectMenuItem(serializableItem as SerializableMenuItem));
     setIsOpen(false);
     router.push("/dashboard");
   };
@@ -51,12 +55,12 @@ const MegaMenu: React.FC<MegaMenuProps> = ({ menuData, userRole }) => {
         <div
           ref={menuRef}
           className="
-    absolute top-full left-1/2 transform -translate-x-1/2
-    mt-2 bg-white shadow-lg rounded-lg
-    w-[90vw] max-w-4xl
-    z-50
-    px-6 py-4
-  "
+            absolute top-full left-1/2 transform -translate-x-1/2
+            mt-2 bg-white shadow-lg rounded-lg
+            w-[90vw] max-w-4xl
+            z-50
+            px-6 py-4
+          "
         >
           {/* Responsive Grid */}
           <div

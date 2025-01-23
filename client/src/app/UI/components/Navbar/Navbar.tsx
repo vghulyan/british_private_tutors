@@ -143,12 +143,7 @@ const Navbar = () => {
         )}
 
         {isSuccess && (
-          // <MegaMenu menuData={getNavigationItems} userRole={role as UserRole} />
-          <MegaMenu
-            menuData={getNavigationItems}
-            userRole={role as UserRole}
-            align="center" // or "left", or "center"
-          />
+          <MegaMenu menuData={getNavigationItems} userRole={role as UserRole} />
         )}
 
         {/* Right section: Notifications + Profile/Dropdown */}
